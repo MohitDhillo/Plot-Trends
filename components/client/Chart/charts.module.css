@@ -1,0 +1,22 @@
+/* pages/index.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.graphContainer {
+  width: 80%;
+  height: 60vh;
+  padding: 24px;
+  position: relative;
+  border-radius: var(--radius);
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  box-sizing: content-box;
+}
+
+.graphContainer svg {
+  width: 100%;
+  height: 100%;
+}
