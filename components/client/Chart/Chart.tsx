@@ -3,9 +3,10 @@
 import { useRef } from "react";
 import Graph from "@/components/Graph/Graph";
 import styles from "./charts.module.css";
+import {getTrendsData} from "@/app/api/trends/getTrendsData";
 
 // Define types for data points
-interface DataPoint {
+export interface DataPoint {
   timestamp: number;
   value: number;
 }
@@ -43,9 +44,21 @@ export default function Home() {
   const graphRef = useRef<GraphRef>(null);
 
   // Function to append line graph data
-  const handleAddLineGraph1 = () => {
-    graphRef.current?.appendLineGraph(dataLine1);
+  const handleAddLineGraph1 = async () => {
+    let result = await getTrendsData("USA");
+    let r2: DataPoint[] = [];
+    let co = 0 ;
+    for(let i = 0 ; i<result.length; i++)
+    {
+      if(result[i].timestamp >= 1600059200000 && co <7)
+      {
+        r2.push(result[i]);
+        co = co+1 ;
+      }
+    }
+    graphRef.current?.appendLineGraph(r2);
   };
+
   const handleAddLineGraph2 = () => {
     graphRef.current?.appendLineGraph(dataLine2);
   };
