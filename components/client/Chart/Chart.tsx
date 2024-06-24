@@ -3,12 +3,13 @@
 import { useRef } from "react";
 import Graph from "@/components/Graph/Graph";
 import styles from "./charts.module.css";
-
+import {QueryParams, getTrendsData} from '@/lib/utils'
 // Define types for data points
 interface DataPoint {
   timestamp: number;
   value: number;
 }
+
 
 const dataLine1: DataPoint[] = [
   { timestamp: 1609459200000, value: 30 }, // Jan 1, 2021
@@ -43,11 +44,15 @@ export default function Home() {
   const graphRef = useRef<GraphRef>(null);
 
   // Function to append line graph data
-  const handleAddLineGraph1 = () => {
-    graphRef.current?.appendLineGraph(dataLine1);
+  const handleAddLineGraph1 = async () => {
+    const params = { keyword: 'India'}
+    const result = await getTrendsData(params);
+    graphRef.current?.appendLineGraph(result);
   };
-  const handleAddLineGraph2 = () => {
-    graphRef.current?.appendLineGraph(dataLine2);
+  const handleAddLineGraph2 = async () => {
+    const params = { keyword: 'USA'}
+    const result = await getTrendsData(params);
+    graphRef.current?.appendLineGraph(result);
   };
 
   // Function to append bar graph data
