@@ -27,6 +27,7 @@ export interface GraphRef {
   appendLineGraph: (newData: DataPoint[]) => void;
   appendBarGraph: (newData: DataPoint[]) => void;
   changeRange: (newRange: [Date, Date]) => void;
+  removeGraph: (index: number) => void;
 }
 
 const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
@@ -35,12 +36,9 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
   const [data, setData] = useState<Series[]>([]);
   const [range, setRange] = useState<[Date, Date]>([
-    new Date(1609459200000),
-    new Date(1625097600000),
+    new Date(1585767650000),
+    new Date(),
   ]);
-  const colorArray = ["red", "blue", "green", "orange", "purple", "cyan"];
-  let colorIndex = 0;
-
   // Handle window resize to make the graph responsive
   useEffect(() => {
     const handleResize = () => {
@@ -82,11 +80,15 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
     changeRange(newRange: [Date, Date]) {
       setRange(newRange);
     },
+    removeGraph(index: number) {
+      const newData = data.filter((_, i) => i !== index);
+      setData(newData);
+    },
   }));
 
   // Update the graph when data or dimensions change
   useEffect(() => {
-    if (!data.length) return;
+    // if (!data.length) return;
 
     const svg = d3.select(svgRef.current);
     const tooltip = d3.select(tooltipRef.current);
@@ -113,6 +115,17 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
     // Clear the SVG content before redrawing
     svg.selectAll("*").remove();
 
+    if (!data.length) {
+      svg
+        .append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 2)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "24px")
+        .attr("fill", "gray")
+        .text("Search for trends to plot the graph");
+      return; // Update: Ensure function exits if no data is present
+    }
     const svgGroup = svg.append("g");
 
     // Determine the time format and interval based on the width

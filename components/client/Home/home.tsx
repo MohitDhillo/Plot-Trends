@@ -8,9 +8,23 @@ export default function Main() {
   const handleAddLineGraph = async (data: []) => {
     graphRef?.current?.appendLineGraph(data);
   };
+  const handleAddBarGraph = (data: []) => {
+    graphRef?.current?.appendBarGraph(data);
+  };
+  const handleChangeRange = (newRange: [Date, Date]) => {
+    graphRef.current?.changeRange(newRange);
+  };
+  const handledeleteLine = (i:number) => {
+    graphRef.current?.removeGraph(i);
+  };
   return (
     <div className="flex">
-      <Sidebar handleLine={handleAddLineGraph} />
+      <Sidebar
+        handleLine={handleAddLineGraph}
+        handleBar={handleAddBarGraph}
+        handleRange={handleChangeRange}
+        handleDeleteLine={handledeleteLine}
+      />
       <Chart ref={graphRef} />
     </div>
   );
