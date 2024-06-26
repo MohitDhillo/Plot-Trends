@@ -1,15 +1,15 @@
 // pages/index.tsx
 "use client";
-import { useRef } from "react";
-import Graph from "@/components/Graph/Graph";
+import { useRef, Ref, forwardRef } from "react";
+import Graph, { GraphRef } from "@/components/Graph/Graph";
 import styles from "./charts.module.css";
-import {QueryParams, getTrendsData} from '@/lib/utils'
+
+import { QueryParams, getTrendsData } from "@/lib/utils/TrendsUtils";
 // Define types for data points
 interface DataPoint {
   timestamp: number;
   value: number;
 }
-
 
 const dataLine1: DataPoint[] = [
   { timestamp: 1609459200000, value: 30 }, // Jan 1, 2021
@@ -40,24 +40,27 @@ const dataBar: DataPoint[] = [
   { timestamp: 1625097600000, value: 90 }, // Jul 1, 2021
 ];
 
-export default function Home() {
-  const graphRef = useRef<GraphRef>(null);
+const Home = forwardRef((props, graphRef: Ref<GraphRef>) => {
+  // const graphRef = useRef<GraphRef>(null);
 
   // Function to append line graph data
+  const handleAddLineGraph = async (data: []) => {
+    graphRef?.current?.appendLineGraph(data);
+  };
   const handleAddLineGraph1 = async () => {
-    const params = { keyword: 'India'}
+    const params = { keyword: "India" };
     const result = await getTrendsData(params);
-    graphRef.current?.appendLineGraph(result);
+    graphRef?.current?.appendLineGraph(result);
   };
   const handleAddLineGraph2 = async () => {
-    const params = { keyword: 'USA'}
+    const params = { keyword: "USA" };
     const result = await getTrendsData(params);
-    graphRef.current?.appendLineGraph(result);
+    graphRef?.current?.appendLineGraph(result);
   };
 
   // Function to append bar graph data
   const handleAddBarGraph = () => {
-    graphRef.current?.appendBarGraph(dataBar);
+    graphRef?.current?.appendBarGraph(dataBar);
   };
 
   // Function to change the data range
@@ -80,4 +83,5 @@ export default function Home() {
       <button onClick={handleChangeRange}>Change Range</button>
     </main>
   );
-}
+});
+export default Home;

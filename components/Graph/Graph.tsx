@@ -23,7 +23,7 @@ interface Series {
   color: string;
 }
 
-interface GraphRef {
+export interface GraphRef {
   appendLineGraph: (newData: DataPoint[]) => void;
   appendBarGraph: (newData: DataPoint[]) => void;
   changeRange: (newRange: [Date, Date]) => void;

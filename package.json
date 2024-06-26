@@ -1,5 +1,5 @@
 {
-  "name": "trends",
+  "name": "plot-trends",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,22 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@nextui-org/react": "^2.4.2",
+    "@react-stately/data": "^3.11.4",
+    "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
-    "next": "14.2.3",
+    "framer-motion": "^11.2.12",
+    "google-trends-api": "^4.9.2",
+    "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@types/d3": "^7.4.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
 }
