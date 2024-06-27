@@ -35,6 +35,14 @@
   align-items: center;
   padding: 0.5rem 1rem;
   border-radius: 10px;
-  background-color: var(--primary);
   color: var(--white);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+.content > p {
+  font-size: var(--small);
+  color: rgb(224, 224, 224);
 }

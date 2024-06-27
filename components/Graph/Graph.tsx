@@ -11,21 +11,28 @@ import { colors } from "./colors";
 import * as d3 from "d3";
 
 // Define types for data points and the graph ref functions
-interface DataPoint {
-  timestamp: number;
+export interface DataPoint {
+  timestamp?: number;
   value: number;
   date?: Date;
+  data?: { [key: string]: string };
 }
 
 interface Series {
+  name: string;
   type: "line" | "bar";
+  category: "trends" | "stocks" | string;
   values: DataPoint[];
   color: string;
 }
 
 export interface GraphRef {
-  appendLineGraph: (newData: DataPoint[]) => void;
-  appendBarGraph: (newData: DataPoint[]) => void;
+  appendLineGraph: (val: {
+    newData: DataPoint[];
+    category: string;
+    name: string;
+  }) => string;
+  appendBarGraph: (val: { newData: DataPoint[]; category: string }) => void;
   changeRange: (newRange: [Date, Date]) => void;
   removeGraph: (index: number) => void;
 }
@@ -63,19 +70,39 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
 
   // Expose functions to the parent component
   useImperativeHandle(ref, () => ({
-    appendLineGraph(newData: DataPoint[]) {
-      newData.forEach((d) => (d.date = new Date(d.timestamp)));
+    appendLineGraph(val: {
+      newData: DataPoint[];
+      category: string;
+      name: string;
+    }) {
+      console.log("Adding line graph", val);
+      const color = assignColor();
+      val.newData.forEach((d) => (d.date = new Date(d.timestamp || 0)));
       setData((currentData) => [
         ...currentData,
-        { type: "line", values: newData, color: assignColor() },
+        {
+          name: val.name,
+          type: "line",
+          category: val.category,
+          values: val.newData,
+          color: color,
+        },
       ]);
+      return color;
     },
-    appendBarGraph(newData: DataPoint[]) {
-      newData.forEach((d) => (d.date = new Date(d.timestamp)));
-      setData((currentData) => [
-        ...currentData,
-        { type: "bar", values: newData, color: assignColor() },
-      ]);
+    appendBarGraph(val: { newData: DataPoint[]; category: string }) {
+      // val.newData.forEach((d) => (d.date = new Date(d.timestamp)));
+      // const color = assignColor();
+      // setData((currentData) => [
+      //   ...currentData,
+      //   {
+      //     type: "bar",
+      //     category: val.category,
+      //     values: val.newData,
+      //     color: color,s
+      //   },
+      //   ,
+      // ]);
     },
     changeRange(newRange: [Date, Date]) {
       setRange(newRange);
@@ -170,7 +197,7 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
           .attr("cy", (d) => y(d.value))
           .attr("r", 3)
           .attr("fill", series.color)
-          .on("mouseover", (event, d) => handleMouseOver(event, d))
+          .on("mouseover", (event, d) => handleMouseOver(event, d, series.name))
           .on("mousemove", (event, d) => handleMouseMove(event, d))
           .on("mouseout", () => handleMouseOut());
 
@@ -191,16 +218,18 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
           .attr("width", barWidth)
           .attr("fill", series.color)
           .attr("class", "graph-bar")
-          .on("mouseover", (event, d) => handleMouseOver(event, d))
+          .on("mouseover", (event, d) => handleMouseOver(event, d, series.name))
           .on("mousemove", (event, d) => handleMouseMove(event, d))
           .on("mouseout", () => handleMouseOut());
       }
     });
-    function handleMouseOver(event: any, d: DataPoint) {
+    function handleMouseOver(event: any, d: DataPoint, name: string) {
       tooltip.style("display", "block");
       tooltip
         .html(
-          `Date: ${d3.timeFormat("%B %d, %Y")(d.date!)}<br>Value: ${d.value}`
+          `Name:${name}<br>Date: ${d3.timeFormat("%B %d, %Y")(
+            d.date!
+          )}<br>Value: ${d.value}`
         )
         .style("left", `${event.pageX}px`)
         .style("top", `${event.pageY}px`);

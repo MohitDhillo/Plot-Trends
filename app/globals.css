@@ -6,12 +6,19 @@
   --normal: 400;
   --bold: 700;
   --semi-bold: 600;
+  --small: 12px;
   --primary: #151d27;
   --background: #e3e3e3;
   --secondary: #678dbf;
   --white: #ffffff;
   --radius: 8px;
   --shadow: 2px 2px 2px 1px rgb(0 0 0 / 20%);
+}
+@layer base {
+  :root {
+    --color-primary: var(--primary);
+    --nextui-primary: var(--primary);
+  }
 }
 @media (prefers-color-scheme: dark) {
   :root {
