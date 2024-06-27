@@ -20,14 +20,7 @@ export async function GET(req: NextRequest) {
         }
 
         const autocompleteData = result['bestMatches'].map(match => ({
-            symbol: match['1. symbol'],
-            name: match['2. name'],
-            region: match['4. region'],
-            marketOpen: match['5. marketOpen'],
-            marketClose: match['6. marketClose'],
-            timezone: match['7. timezone'],
-            currency: match['8. currency'],
-            matchScore: parseFloat(match['9. matchScore']),
+            query: match['1. symbol'] + match['2. name']
         }));
 
         return NextResponse.json(autocompleteData);
