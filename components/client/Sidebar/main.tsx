@@ -102,7 +102,11 @@ export default function Sidebar({
     if (!Key) return;
     const params = { keyword: Key };
     const result = await getTrendsData(params);
-    const col = handleLine({ newData: result, category: "trends", name: Key.toString() });
+    const col = handleLine({
+      newData: result,
+      category: "trends",
+      name: Key.toString(),
+    });
     gtrendlist.setFilterText("");
     setPlot("");
     setTrends([...trends, { key: Key, category: "trends", color: col }]);
@@ -134,7 +138,8 @@ export default function Sidebar({
   };
   return (
     <aside className={styles.container}>
-      <section>
+      <h3>Trends</h3>
+      <section className="dark">
         <DateRangePicker
           // isInvalid
           defaultValue={{
@@ -148,7 +153,7 @@ export default function Sidebar({
         <div className="mt-2">
           <Dropdown backdrop="blur">
             <DropdownTrigger>
-              <Button variant="shadow" color="primary">
+              <Button variant="shadow" color="secondary">
                 Add Plot
               </Button>
             </DropdownTrigger>
@@ -218,8 +223,8 @@ export default function Sidebar({
               <Dropdown backdrop="blur">
                 <DropdownTrigger>
                   <Button
-                    variant="bordered"
-                    className="text-white min-w-8 h-6 rounded-md"
+                    // variant="bordered"
+                    className="text-white min-w-8 h-6 rounded-md bg-transparent hover:bg-gray-900"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

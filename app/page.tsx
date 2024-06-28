@@ -3,7 +3,7 @@ import Main from "@/components/client/Home/home";
 export default function Home() {
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <Main />
     </>
   );

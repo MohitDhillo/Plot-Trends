@@ -1,14 +1,16 @@
 .container {
-  margin-top: 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
+  background-color: var(--background);
+  color: #7b7b7b;
 }
 .graphContainer {
+  background-color: var(--white);
   width: 80%;
-  height: 60vh;
+  height: 75%;
   padding: 24px;
   position: relative;
   border-radius: var(--radius);

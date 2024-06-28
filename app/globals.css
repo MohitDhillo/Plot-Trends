@@ -7,8 +7,8 @@
   --bold: 700;
   --semi-bold: 600;
   --small: 12px;
-  --primary: #151d27;
-  --background: #e3e3e3;
+  --primary: #000000;
+  --background: #fafafa;
   --secondary: #678dbf;
   --white: #ffffff;
   --radius: 8px;
@@ -29,9 +29,11 @@
 }
 
 body {
+  color: var(--white);
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background-color: var(--background);
 }
 
 @layer utilities {

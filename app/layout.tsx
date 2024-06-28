@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={fira.className}>
+      <body className={`${fira.className} dark `}>
         <Providers>{children}</Providers>
       </body>
     </html>

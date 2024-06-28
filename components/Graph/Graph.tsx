@@ -7,7 +7,7 @@ import {
   forwardRef,
   Ref,
 } from "react";
-import { colors } from "./colors";
+import colors from "./colors";
 import * as d3 from "d3";
 
 // Define types for data points and the graph ref functions
@@ -120,7 +120,7 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
     const svg = d3.select(svgRef.current);
     const tooltip = d3.select(tooltipRef.current);
     const { width, height } = dimensions;
-    const margin = { top: 20, right: 30, bottom: 64, left: 40 };
+    const margin = { top: 20, right: 30, bottom: 80, left: 40 };
 
     // Set up the x and y scales
     const x = d3

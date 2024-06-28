@@ -4,6 +4,13 @@
   gap: 1rem;
   padding: 2%;
   width: 30%;
+  height: calc(100dvh);
+  background-color: var(--primary);
+}
+.container > h3 {
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: var(--bold);
 }
 .activeGraph {
   padding-right: 6px;
@@ -20,7 +27,6 @@
   position: sticky;
   top: 0;
   z-index: 500;
-  background-color: white;
 }
 .activeGraph::-webkit-scrollbar {
   width: 6px;
@@ -41,8 +47,9 @@
 .content {
   display: flex;
   flex-direction: column;
+  font-weight: var(--semi-bold);
 }
 .content > p {
   font-size: var(--small);
-  color: rgb(224, 224, 224);
+  color: var(--primary);
 }

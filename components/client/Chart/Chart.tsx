@@ -4,7 +4,7 @@ import styles from "./charts.module.css";
 
 const Home = forwardRef((props, graphRef: Ref<GraphRef>) => {
   return (
-    <main className={styles.container}>
+    <main className={`${styles.container} light`}>
       <div className={styles.graphContainer}>
         <Graph ref={graphRef} />
       </div>
