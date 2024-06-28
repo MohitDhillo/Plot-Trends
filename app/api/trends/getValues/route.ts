@@ -11,6 +11,11 @@ export async function GET(req: NextRequest) {
 
     try {
         const result = await googleTrends.interestOverTime({ keyword: key });
+
+        if (typeof result !== 'string' || result.trim().startsWith('<')) {
+            throw new Error('Invalid response format');
+        }
+
         const parsedResult = JSON.parse(result);
 
         // Optionally transform the result
@@ -25,3 +30,4 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Error fetching Google Trends data' }, { status: 500 });
     }
 }
+
