@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 // import fetch from 'node-fetch';
 
-const ALPHA_VANTAGE_API_KEY = "your_alpha_vantage_api_key"; // Replace with your Alpha Vantage API key
+const FINNHUB_API_KEY = "clsbfuhr01qoidjen33gclsbfuhr01qoidjen340"; // Replace with your Finnhub API key
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -9,40 +9,39 @@ export async function GET(req: NextRequest) {
 
   if (!symbol) {
     return NextResponse.json(
-      { error: "Symbol query parameter is missing" },
-      { status: 400 }
+        { error: "Symbol query parameter is missing" },
+        { status: 400 }
     );
   }
 
   try {
+    // Set date range to cover the maximum range Finnhub provides (10 years back from now)
+    const now = Math.floor(Date.now() / 1000); // current timestamp in seconds
+    const tenYearsAgo = now - 20 * 365 * 24 * 60 * 60; // 10 years ago
+
     const response = await fetch(
-      `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
+        `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=M&from=${tenYearsAgo}&to=${now}&token=${FINNHUB_API_KEY}`
     );
     const result = await response.json();
 
-    if (result["Error Message"]) {
+    if (result.s !== "ok") {
       return NextResponse.json(
-        { error: "Error fetching stock data from Alpha Vantage" },
-        { status: 500 }
+          { error: "Error fetching stock data from Finnhub" },
+          { status: 500 }
       );
     }
 
-    const timeSeries = result["Time Series (Daily)"];
-    const stockData = Object.keys(timeSeries).map((date) => ({
-      date,
-      open: parseFloat(timeSeries[date]["1. open"]),
-      high: parseFloat(timeSeries[date]["2. high"]),
-      low: parseFloat(timeSeries[date]["3. low"]),
-      close: parseFloat(timeSeries[date]["4. close"]),
-      volume: parseInt(timeSeries[date]["5. volume"]),
+    const timelineData = result.t.map((timestamp, index) => ({
+      timestamp: timestamp * 1000, // Convert to milliseconds
+      value: result.c[index], // Use closing price as the value
     }));
 
-    return NextResponse.json(stockData);
+    return NextResponse.json(timelineData);
   } catch (error) {
     console.error("Error fetching stock data:", error);
     return NextResponse.json(
-      { error: "Error fetching stock data" },
-      { status: 500 }
+        { error: "Error fetching stock data" },
+        { status: 500 }
     );
   }
 }
