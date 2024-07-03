@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-// import fetch from 'node-fetch';
 
-const ALPHA_VANTAGE_API_KEY = "clsbfuhr01qoidjen33gclsbfuhr01qoidjen340"; // Replace with your Alpha Vantage API key
+const ALPHA_VANTAGE_API_KEY = process.env.API_KEY;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);

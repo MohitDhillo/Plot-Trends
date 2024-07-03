@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-// import fetch from 'node-fetch';
 
-const FINNHUB_API_KEY = "clsbfuhr01qoidjen33gclsbfuhr01qoidjen340"; // Replace with your Finnhub API key
+const FINNHUB_API_KEY = process.env.API_KEY;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -15,12 +14,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Set date range to cover the maximum range Finnhub provides (10 years back from now)
     const now = Math.floor(Date.now() / 1000); // current timestamp in seconds
-    const tenYearsAgo = now - 20 * 365 * 24 * 60 * 60; // 10 years ago
+    const twentyYearsAgo = now - 20 * 365 * 24 * 60 * 60; // 10 years ago
 
     const response = await fetch(
-        `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=M&from=${tenYearsAgo}&to=${now}&token=${FINNHUB_API_KEY}`
+        `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=M&from=${twentyYearsAgo}&to=${now}&token=${FINNHUB_API_KEY}`
     );
     const result = await response.json();
 
