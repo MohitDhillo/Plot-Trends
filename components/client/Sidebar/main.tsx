@@ -2,40 +2,24 @@
 import { getTrendsData } from "@/lib/utils/TrendsUtils";
 import { getStockData } from "@/lib/utils/StockUtils";
 import { useAsyncList } from "@react-stately/data";
-import {
-  parseDate,
-  today,
-  getLocalTimeZone,
-  type CalendarDate,
-  type CalendarDateTime,
-  type ZonedDateTime,
-} from "@internationalized/date";
+import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import {
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
   Button,
-  Input,
   Autocomplete,
   AutocompleteItem,
   DateRangePicker,
 } from "@nextui-org/react";
 import { useState } from "react";
 import styles from "./bar.module.css";
+import { useGraphStore } from "@/lib/stores/store";
+import { randomColor } from "@/lib/colors/rcol";
 
 type autocompleteData = { query: string; value: number };
-export default function Sidebar({
-  handleLine,
-  handleBar,
-  handleRange,
-  handleDeleteLine,
-}: {
-  handleLine: (result: any) => string;
-  handleBar: (result: any) => void;
-  handleRange: (result: any) => void;
-  handleDeleteLine: (result: any) => void;
-}) {
+export default function Sidebar() {
   let gtrendlist = useAsyncList<autocompleteData>({
     async load({ signal, filterText }) {
       let data: autocompleteData[] = [];
@@ -94,73 +78,64 @@ export default function Sidebar({
       };
     },
   });
-
-  const [trends, setTrends] = useState<
-    { key: string; category: string; color: string }[]
-  >([]);
+  const {
+    graphData: data,
+    range,
+    appendGraph,
+    removeGraph,
+    changeRange,
+    updateGraph,
+  } = useGraphStore((state) => state);
   const [plot, setPlot] = useState("");
   const [active, setActive] = useState(false);
   const [color, setColor] = useState("");
-  const onSelectionTrendChange = async (Key: key) => {
+  const onSelectionTrendChange = async (Key: any) => {
     if (!Key) return;
     const params = { keyword: Key };
     const result = await getTrendsData(params);
-    const col = handleLine({
-      newData: result,
-      category: "trends",
+    appendGraph({
       name: Key.toString(),
+      values: result,
+      category: "trends",
+      type: "line",
+      color: randomColor(),
     });
     gtrendlist.setFilterText("");
     setPlot("");
-    setTrends([...trends, { key: Key, category: "trends", color: col }]);
   };
-  const onSelectionStockChange = async (Key: key) => {
+  const onSelectionStockChange = async (Key: any) => {
     if (!Key) return;
     const params = { keyword: Key };
     const result = await getStockData(params);
-    const col = handleLine({ newData: result, category: "stocks", name: Key });
+    appendGraph({
+      name: Key.toString(),
+      values: result,
+      category: "stocks",
+      type: "line",
+      color: randomColor(),
+    });
     gtrendlist.setFilterText("");
     setPlot("");
-    setTrends([...trends, { key: Key, category: "stocks", color: col }]);
   };
-  const test = async () => {
-    const params = { keyword: "AAPL" };
-    const result = await getStockData(params);
-    const col = handleLine({
-      newData: result,
-      category: "stocks",
-      name: "AAPL",
-    });
-  };
-  const onRangeChange = (
-    range:
-      | RangeValue<CalendarDate | CalendarDateTime | ZonedDateTime>
-      | undefined
-      | null
-  ) => {
+  const onRangeChange = (range: any) => {
     if (!range) return;
     const newRange: [Date, Date] = [range.start.toDate(), range.end.toDate()];
-    handleRange(newRange);
+    changeRange(newRange);
   };
-  const handleDropdown = (key: key, index: number) => {
+  const handleDropdown = (key: any, index: number) => {
+    console.log(key);
     if (key == "delete") {
-      handleDeleteGraph(key, index);
+      removeGraph(index);
     } else if (key == "color") {
-      handleColorGraph(key, index);
+      console.log("color");
+      updateGraph(index, {
+        ...data[index],
+        color: color ? color : randomColor(),
+      });
     }
-  };
-  const handleDeleteGraph = (key: key, index: number) => {
-    if (key === "delete") {
-      handleDeleteLine(index);
-      setTrends(trends.filter((_, i) => i !== index));
-    }
-  };
-  const handleColorGraph = (key: key, index: number) => {
-    // setTrends(...trends, (trends[index].color = key));
   };
   return (
     <main className={styles.container}>
-      {/* <button onClick={test}>test</button> */}
       <h3>Trends</h3>
       <aside
         className={
@@ -238,14 +213,14 @@ export default function Sidebar({
             <header>
               <h3>Active Plots</h3>
             </header>
-            {trends.map((trend, index) => (
+            {data.map((trend, index) => (
               <div
                 className={styles.trend}
                 style={{ backgroundColor: trend.color }}
-                key={trend.key}
+                key={trend.name}
               >
                 <div className={styles.content}>
-                  <h3>{trend.key}</h3>
+                  <h3>{trend.name}</h3>
                   <p>{trend.category}</p>
                 </div>
                 <Dropdown backdrop="blur">
@@ -274,13 +249,18 @@ export default function Sidebar({
                     closeOnSelect={false}
                     onAction={(key) => handleDropdown(key, index)}
                   >
-                    <DropdownItem key="changecol">
-                      <div className="flex items-center gap-2">
+                    <DropdownItem
+                      key="color"
+                      description="Click to update Color"
+                    >
+                      <div className="flex items-center justify-between gap-8">
                         <span>Change Color</span>
-                        <Input
+
+                        <input
+                          className="w-6 h-4 p-0"
                           type="color"
                           value={color}
-                          onChange={(e) => handleColorGraph(color, index)}
+                          onChange={(e) => setColor(e.target.value)}
                         />
                       </div>
                     </DropdownItem>

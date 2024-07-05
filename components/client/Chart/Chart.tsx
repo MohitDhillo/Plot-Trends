@@ -1,14 +1,13 @@
-import { Ref, forwardRef } from "react";
-import Graph, { GraphRef } from "@/components/Graph/Graph";
+import Graph from "@/components/Graph/Graph";
 import styles from "./charts.module.css";
 
-const Home = forwardRef((props, graphRef: Ref<GraphRef>) => {
+const Home = () => {
   return (
     <main className={`${styles.container} light`}>
       <div className={styles.graphContainer}>
-        <Graph ref={graphRef} />
+        <Graph />
       </div>
     </main>
   );
-});
+};
 export default Home;

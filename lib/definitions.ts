@@ -3,18 +3,18 @@ export type QueryParams = {
 };
 
 export interface DataPoint {
-  timestamp?: number;
+  timestamp: number;
   value: number;
-  date?: Date;
-  data?: { [key: string]: string };
 }
 
 export interface Series {
   name: string;
+  symbol?: string;
   type: "line" | "bar";
   category: "trends" | "stocks" | string;
   values: DataPoint[];
   color: string;
+  feature?: string;
 }
 
 export interface GraphRef {

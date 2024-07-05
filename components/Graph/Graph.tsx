@@ -1,25 +1,16 @@
 // components/Graph.tsx
-import {
-  useEffect,
-  useRef,
-  useState,
-  useImperativeHandle,
-  forwardRef,
-  Ref,
-} from "react";
-import colors from "./colors";
+"use client";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import { DataPoint, Series, GraphRef } from "@/lib/definitions";
+import { DataPoint } from "@/lib/definitions";
+import { useGraphStore } from "@/lib/stores/store";
 
-const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
+const Graph = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
-  const [data, setData] = useState<Series[]>([]);
-  const [range, setRange] = useState<[Date, Date]>([
-    new Date(1585767650000),
-    new Date(),
-  ]);
+  const { graphData: data, range } = useGraphStore((state) => state);
+
   // Handle window resize to make the graph responsive
   useEffect(() => {
     const handleResize = () => {
@@ -33,64 +24,8 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Assign a unique color to each series
-  function randomIntFromInterval(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
-  const assignColor = (): string => {
-    const color = colors[randomIntFromInterval(0, 400)];
-    return color;
-  };
-
-  // Expose functions to the parent component
-  useImperativeHandle(ref, () => ({
-    appendLineGraph(val: {
-      newData: DataPoint[];
-      category: string;
-      name: string;
-    }) {
-      console.log("Adding line graph", val);
-      const color = assignColor();
-      val.newData.forEach((d) => (d.date = new Date(d.timestamp || 0)));
-      setData((currentData) => [
-        ...currentData,
-        {
-          name: val.name,
-          type: "line",
-          category: val.category,
-          values: val.newData,
-          color: color,
-        },
-      ]);
-      return color;
-    },
-    appendBarGraph(val: { newData: DataPoint[]; category: string }) {
-      // val.newData.forEach((d) => (d.date = new Date(d.timestamp)));
-      // const color = assignColor();
-      // setData((currentData) => [
-      //   ...currentData,
-      //   {
-      //     type: "bar",
-      //     category: val.category,
-      //     values: val.newData,
-      //     color: color,s
-      //   },
-      //   ,
-      // ]);
-    },
-    changeRange(newRange: [Date, Date]) {
-      setRange(newRange);
-    },
-    removeGraph(index: number) {
-      const newData = data.filter((_, i) => i !== index);
-      setData(newData);
-    },
-  }));
-
   // Update the graph when data or dimensions change
   useEffect(() => {
-    // if (!data.length) return;
-
     const svg = d3.select(svgRef.current);
     const tooltip = d3.select(tooltipRef.current);
     const { width, height } = dimensions;
@@ -102,8 +37,6 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
       .domain(range)
       .range([margin.left, width - margin.right])
       .nice();
-    x.ticks(10);
-
     const y = d3
       .scaleLinear()
       .domain([
@@ -125,22 +58,17 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
         .attr("font-size", "24px")
         .attr("fill", "gray")
         .text("Search for trends to plot the graph");
-      return; // Update: Ensure function exits if no data is present
+      return;
     }
+
     const svgGroup = svg.append("g");
 
-    // Determine the time format and interval based on the width
-    const timeFormat = width < 500 ? "%b %d" : "%b %Y";
-    const timeInterval =
-      width < 500 ? d3.timeDay.every(1) : d3.timeMonth.every(1);
-
-    // Draw the x and y axes
-    svgGroup
+    const xAxis = svgGroup
       .append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
       .call(d3.axisBottom(x));
 
-    svgGroup
+    const yAxis = svgGroup
       .append("g")
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(y));
@@ -150,7 +78,7 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
       if (series.type === "line") {
         const line = d3
           .line<DataPoint>()
-          .x((d) => x(d.date!))
+          .x((d) => x(d.timestamp!))
           .y((d) => y(d.value));
 
         const path = svgGroup
@@ -167,7 +95,7 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
           .selectAll("circle")
           .data(series.values)
           .join("circle")
-          .attr("cx", (d) => x(d.date!))
+          .attr("cx", (d) => x(d.timestamp!))
           .attr("cy", (d) => y(d.value))
           .attr("r", 3)
           .attr("fill", series.color)
@@ -181,12 +109,12 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
         const barWidth =
           (width - margin.left - margin.right) / series.values.length - 1;
 
-        const bars = svgGroup
+        svgGroup
           .append("g")
           .selectAll("rect")
           .data(series.values)
           .join("rect")
-          .attr("x", (d) => x(d.date!))
+          .attr("x", (d) => x(d.timestamp!))
           .attr("y", (d) => y(d.value))
           .attr("height", (d) => y(0) - y(d.value))
           .attr("width", barWidth)
@@ -197,12 +125,13 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
           .on("mouseout", () => handleMouseOut());
       }
     });
+
     function handleMouseOver(event: any, d: DataPoint, name: string) {
       tooltip.style("display", "block");
       tooltip
         .html(
-          `Name:${name}<br>Date: ${d3.timeFormat("%B %d, %Y")(
-            d.date!
+          `Name: ${name}<br>Date: ${d3.timeFormat("%B %d, %Y")(
+            new Date(d.timestamp)!
           )}<br>Value: ${d.value}`
         )
         .style("left", `${event.pageX}px`)
@@ -219,7 +148,6 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
       tooltip.style("display", "none");
     }
 
-    // Function to handle mouse over for paths
     function handlePathMouseOver(color: string) {
       svg.selectAll(".graph-line, .graph-bar").attr("opacity", 0.3);
       svg
@@ -233,6 +161,45 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
         .selectAll(".graph-line, .graph-bar")
         .attr("opacity", 1)
         .attr("stroke-width", 1.5); // Reset the line thickness
+    }
+
+    const zoom = d3
+      .zoom()
+      .scaleExtent([0.5, 10])
+      .translateExtent([
+        [-100, -100],
+        [width + 100, height + 100],
+      ])
+      .on("zoom", zoomed);
+
+    svg.call(zoom);
+
+    function zoomed(event: any) {
+      const transform = event.transform;
+      const newX = transform.rescaleX(x);
+      const newY = y;
+
+      xAxis.call(d3.axisBottom(newX));
+      yAxis.call(d3.axisLeft(newY));
+
+      svgGroup.selectAll(".graph-line").attr(
+        "d",
+        d3
+          .line<DataPoint>()
+          .x((d) => newX(d.timestamp!))
+          .y((d) => newY(d.value))
+      );
+
+      svgGroup
+        .selectAll("circle")
+        .attr("cx", (d) => newX(d.timestamp!))
+        .attr("cy", (d) => newY(d.value));
+
+      svgGroup
+        .selectAll(".graph-bar")
+        .attr("x", (d) => newX(d.timestamp!))
+        .attr("y", (d) => newY(d.value))
+        .attr("height", (d) => newY(0) - newY(d.value));
     }
   }, [data, dimensions, range]);
 
@@ -252,6 +219,6 @@ const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
       ></div>
     </>
   );
-});
+};
 
 export default Graph;
