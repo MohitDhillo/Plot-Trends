@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
     const response = await fetch(
       `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${keyword}&apikey=${ALPHA_VANTAGE_API_KEY}`
     );
-      const result = await response.json();
-      console.log(ALPHA_VANTAGE_API_KEY)
+    const result = await response.json();
+    console.log(ALPHA_VANTAGE_API_KEY);
     console.log("result", result);
     if (result["Error Message"]) {
       return NextResponse.json(
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const autocompleteData = result["bestMatches"].map((match) => ({
+    const autocompleteData = result["bestMatches"].map((match: any) => ({
       query: `${match["2. name"]} (${match["1. symbol"]})`,
       symbol: match["1. symbol"],
     }));

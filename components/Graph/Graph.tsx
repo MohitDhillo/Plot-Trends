@@ -9,33 +9,7 @@ import {
 } from "react";
 import colors from "./colors";
 import * as d3 from "d3";
-
-// Define types for data points and the graph ref functions
-export interface DataPoint {
-  timestamp?: number;
-  value: number;
-  date?: Date;
-  data?: { [key: string]: string };
-}
-
-interface Series {
-  name: string;
-  type: "line" | "bar";
-  category: "trends" | "stocks" | string;
-  values: DataPoint[];
-  color: string;
-}
-
-export interface GraphRef {
-  appendLineGraph: (val: {
-    newData: DataPoint[];
-    category: string;
-    name: string;
-  }) => string;
-  appendBarGraph: (val: { newData: DataPoint[]; category: string }) => void;
-  changeRange: (newRange: [Date, Date]) => void;
-  removeGraph: (index: number) => void;
-}
+import { DataPoint, Series, GraphRef } from "@/lib/definitions";
 
 const Graph = forwardRef((props, ref: Ref<GraphRef>) => {
   const svgRef = useRef<SVGSVGElement | null>(null);

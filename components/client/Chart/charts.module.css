@@ -6,6 +6,7 @@
   width: 100%;
   background-color: var(--background);
   color: #7b7b7b;
+  height: 100dvh;
 }
 .graphContainer {
   background-color: var(--white);
