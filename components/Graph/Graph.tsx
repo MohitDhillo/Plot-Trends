@@ -62,6 +62,26 @@ const Graph = () => {
     }
 
     const svgGroup = svg.append("g");
+    const xGrid = d3
+      .axisBottom(x)
+      .tickSize(-height + margin.top + margin.bottom)
+      .tickFormat(() => "");
+    const yGrid = d3
+      .axisLeft(y)
+      .tickSize(-width + margin.left + margin.right)
+      .tickFormat(() => "");
+
+    svgGroup
+      .append("g")
+      .attr("class", "x-grid")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .call(xGrid);
+
+    svgGroup
+      .append("g")
+      .attr("class", "y-grid")
+      .attr("transform", `translate(${margin.left},0)`)
+      .call(yGrid);
 
     const xAxis = svgGroup
       .append("g")
@@ -172,7 +192,7 @@ const Graph = () => {
       ])
       .on("zoom", zoomed);
 
-    svg.call(zoom);
+    svg.call(zoom as any);
 
     function zoomed(event: any) {
       const transform = event.transform;
@@ -217,6 +237,12 @@ const Graph = () => {
           pointerEvents: "none",
         }}
       ></div>
+      <style jsx>{`
+        .x-grid .tick line,
+        .y-grid .tick line {
+          stroke: lightgrey;
+        }
+      `}</style>
     </>
   );
 };

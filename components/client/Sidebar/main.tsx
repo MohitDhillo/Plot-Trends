@@ -1,6 +1,5 @@
 "use client";
-import { getTrendsData } from "@/lib/utils/TrendsUtils";
-import { getStockData } from "@/lib/utils/StockUtils";
+import { getData } from "@/lib/utils/apiUtils";
 import { useAsyncList } from "@react-stately/data";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import {
@@ -18,7 +17,7 @@ import styles from "./bar.module.css";
 import { useGraphStore } from "@/lib/stores/store";
 import { randomColor } from "@/lib/colors/rcol";
 
-type autocompleteData = { query: string; value: number };
+type autocompleteData = { symbol?: string; query: string; value: number };
 export default function Sidebar() {
   let gtrendlist = useAsyncList<autocompleteData>({
     async load({ signal, filterText }) {
@@ -78,6 +77,35 @@ export default function Sidebar() {
       };
     },
   });
+  let cryptolist = useAsyncList<autocompleteData>({
+    async load({ signal, filterText }) {
+      let data: autocompleteData[] = [];
+      if (!filterText) {
+        return { items: [] };
+      }
+      try {
+        console.log(filterText);
+        const baseUrl = "/api/crypto/auto-complete"; // Include the protocol
+        const queryParams = `keyword=${filterText}`;
+        const fullUrl = `${baseUrl}?${queryParams}`;
+
+        // Make the GET request
+        const response = await fetch(fullUrl);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        data = await response.json();
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+
+      return {
+        items: data,
+      };
+    },
+  });
   const {
     graphData: data,
     range,
@@ -89,32 +117,20 @@ export default function Sidebar() {
   const [plot, setPlot] = useState("");
   const [active, setActive] = useState(false);
   const [color, setColor] = useState("");
-  const onSelectionTrendChange = async (Key: any) => {
-    if (!Key) return;
+  const onSelectionChange = async (Key: any) => {
+    if (!Key || !plot) return;
     const params = { keyword: Key };
-    const result = await getTrendsData(params);
+    const result = await getData(plot, params);
     appendGraph({
       name: Key.toString(),
       values: result,
-      category: "trends",
+      category: plot,
       type: "line",
       color: randomColor(),
     });
     gtrendlist.setFilterText("");
-    setPlot("");
-  };
-  const onSelectionStockChange = async (Key: any) => {
-    if (!Key) return;
-    const params = { keyword: Key };
-    const result = await getStockData(params);
-    appendGraph({
-      name: Key.toString(),
-      values: result,
-      category: "stocks",
-      type: "line",
-      color: randomColor(),
-    });
-    gtrendlist.setFilterText("");
+    stocklist.setFilterText("");
+    // cryptolist.setFilterText("");
     setPlot("");
   };
   const onRangeChange = (range: any) => {
@@ -166,6 +182,7 @@ export default function Sidebar() {
               >
                 <DropdownItem key="trends">Trends</DropdownItem>
                 <DropdownItem key="stocks">Stocks</DropdownItem>
+                <DropdownItem key="crypto">Crypto</DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -178,7 +195,7 @@ export default function Sidebar() {
                 items={gtrendlist.items}
                 inputValue={gtrendlist.filterText}
                 onInputChange={gtrendlist.setFilterText}
-                onSelectionChange={onSelectionTrendChange}
+                onSelectionChange={onSelectionChange}
                 isLoading={gtrendlist.isLoading}
               >
                 {(item) => (
@@ -198,14 +215,37 @@ export default function Sidebar() {
                 items={stocklist.items}
                 inputValue={stocklist.filterText}
                 onInputChange={stocklist.setFilterText}
-                onSelectionChange={onSelectionStockChange}
+                onSelectionChange={onSelectionChange}
                 isLoading={stocklist.isLoading}
               >
                 {(item) => (
-                  <AutocompleteItem key={item.symbol}>
+                  <AutocompleteItem key={item.symbol || ""}>
                     {item.query}
                   </AutocompleteItem>
                 )}
+              </Autocomplete>
+            </div>
+          )}
+          {plot === "crypto" && (
+            <div className="mt-2">
+              <Autocomplete
+                label="Search Crypto"
+                placeholder="Add Crypto"
+                className="max-w-xs"
+                items={cryptolist.items}
+                inputValue={cryptolist.filterText}
+                onInputChange={cryptolist.setFilterText}
+                onSelectionChange={onSelectionChange}
+                isLoading={cryptolist.isLoading}
+              >
+                <AutocompleteItem key="BINANCE:BTCUSDT">
+                  Bitcoin
+                </AutocompleteItem>
+                {/* {(item) => (
+                  <AutocompleteItem key={item.symbol || ""}>
+                    {item.query}
+                  </AutocompleteItem>
+                )} */}
               </Autocomplete>
             </div>
           )}
