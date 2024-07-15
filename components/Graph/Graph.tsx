@@ -9,9 +9,12 @@ const Graph = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
-  const { graphData: data, range } = useGraphStore((state) => state);
+  const {
+    graphData: data,
+    feature_set,
+    range,
+  } = useGraphStore((state) => state);
 
-  // Handle window resize to make the graph responsive
   useEffect(() => {
     const handleResize = () => {
       const width = svgRef.current?.parentElement?.offsetWidth || 800;
@@ -24,29 +27,30 @@ const Graph = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Update the graph when data or dimensions change
   useEffect(() => {
     const svg = d3.select(svgRef.current);
     const tooltip = d3.select(tooltipRef.current);
     const { width, height } = dimensions;
-    const margin = { top: 20, right: 30, bottom: 80, left: 40 };
+    const margin = { top: 20, right: 30, bottom: 80, left: 0 };
 
-    // Set up the x and y scales
-    const x = d3
-      .scaleTime()
-      .domain(range)
-      .range([margin.left, width - margin.right])
-      .nice();
-    const y = d3
-      .scaleLinear()
-      .domain([
-        0,
-        d3.max(data, (series) => d3.max(series.values, (d) => d.value))!,
-      ])
-      .nice()
-      .range([height - margin.bottom, margin.top]);
+    const yScales: Record<string, d3.ScaleLinear<number, number>> = {};
+    const featureKeys = Array.from(feature_set.keys());
+    const featureSpacing = 60;
+    console.log(data);
+    featureKeys.forEach((feature, index) => {
+      const featureMax = d3.max(
+        data
+          .filter((series) => series.feature === feature)
+          .map((series) => d3.max(series.values, (d) => d.value))
+      );
 
-    // Clear the SVG content before redrawing
+      yScales[feature] = d3
+        .scaleLinear()
+        .domain([0, featureMax!])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
+    });
+    console.log(yScales);
     svg.selectAll("*").remove();
 
     if (!data.length) {
@@ -60,41 +64,61 @@ const Graph = () => {
         .text("Search for trends to plot the graph");
       return;
     }
-
+    const x = d3
+      .scaleTime()
+      .domain(range)
+      .range([
+        margin.left,
+        width - featureKeys.length * featureSpacing - margin.right,
+      ])
+      .nice();
     const svgGroup = svg.append("g");
     const xGrid = d3
       .axisBottom(x)
       .tickSize(-height + margin.top + margin.bottom)
       .tickFormat(() => "");
     const yGrid = d3
-      .axisLeft(y)
-      .tickSize(-width + margin.left + margin.right)
+      .axisLeft(yScales[featureKeys[0]])
+      .tickSize(
+        -width +
+          margin.left +
+          margin.right +
+          featureKeys.length * featureSpacing
+      )
       .tickFormat(() => "");
 
     svgGroup
       .append("g")
       .attr("class", "x-grid")
-      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .attr("transform", `translate(${margin.left},${height - margin.bottom})`)
       .call(xGrid);
 
     svgGroup
       .append("g")
       .attr("class", "y-grid")
-      .attr("transform", `translate(${margin.left},0)`)
+      .attr("transform", `translate(0,0)`)
       .call(yGrid);
 
     const xAxis = svgGroup
       .append("g")
-      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .attr("transform", `translate(${margin.left},${height - margin.bottom})`)
       .call(d3.axisBottom(x));
+    console.log(width, margin.right, featureSpacing, featureKeys.length);
+    featureKeys.forEach((feature, index) => {
+      svgGroup
+        .append("g")
+        .attr(
+          "transform",
+          `translate(${
+            width - margin.right*2.5 - index * featureSpacing
+          },0)`
+        )
+        .call(d3.axisRight(yScales[feature]));
+    });
 
-    const yAxis = svgGroup
-      .append("g")
-      .attr("transform", `translate(${margin.left},0)`)
-      .call(d3.axisLeft(y));
-
-    // Draw the line and bar graphs based on the data
     data.forEach((series) => {
+      const y = yScales[series.feature];
+
       if (series.type === "line") {
         const line = d3
           .line<DataPoint>()
@@ -173,14 +197,14 @@ const Graph = () => {
       svg
         .selectAll(`[stroke="${color}"], [fill="${color}"]`)
         .attr("opacity", 1)
-        .attr("stroke-width", 3); // Increase the line thickness
+        .attr("stroke-width", 3);
     }
 
     function handlePathMouseOut() {
       svg
         .selectAll(".graph-line, .graph-bar")
         .attr("opacity", 1)
-        .attr("stroke-width", 1.5); // Reset the line thickness
+        .attr("stroke-width", 1.5);
     }
 
     const zoom = d3
@@ -197,29 +221,31 @@ const Graph = () => {
     function zoomed(event: any) {
       const transform = event.transform;
       const newX = transform.rescaleX(x);
-      const newY = y;
 
       xAxis.call(d3.axisBottom(newX));
-      yAxis.call(d3.axisLeft(newY));
 
-      svgGroup.selectAll(".graph-line").attr(
-        "d",
-        d3
-          .line<DataPoint>()
-          .x((d) => newX(d.timestamp!))
-          .y((d) => newY(d.value))
-      );
+      featureKeys.forEach((feature) => {
+        const newY = yScales[feature];
 
-      svgGroup
-        .selectAll("circle")
-        .attr("cx", (d) => newX(d.timestamp!))
-        .attr("cy", (d) => newY(d.value));
+        svgGroup.selectAll(".graph-line").attr(
+          "d",
+          d3
+            .line<DataPoint>()
+            .x((d) => newX(d.timestamp!))
+            .y((d) => newY(d.value))
+        );
 
-      svgGroup
-        .selectAll(".graph-bar")
-        .attr("x", (d) => newX(d.timestamp!))
-        .attr("y", (d) => newY(d.value))
-        .attr("height", (d) => newY(0) - newY(d.value));
+        svgGroup
+          .selectAll("circle")
+          .attr("cx", (d) => newX(d.timestamp!))
+          .attr("cy", (d) => newY(d.value));
+
+        svgGroup
+          .selectAll(".graph-bar")
+          .attr("x", (d) => newX(d.timestamp!))
+          .attr("y", (d) => newY(d.value))
+          .attr("height", (d) => newY(0) - newY(d.value));
+      });
     }
   }, [data, dimensions, range]);
 

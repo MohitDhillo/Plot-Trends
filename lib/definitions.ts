@@ -14,7 +14,7 @@ export interface Series {
   category: "trends" | "stocks" | string;
   values: DataPoint[];
   color: string;
-  feature?: string;
+  feature: string;
 }
 
 export interface GraphRef {

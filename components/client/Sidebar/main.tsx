@@ -127,6 +127,7 @@ export default function Sidebar() {
       category: plot,
       type: "line",
       color: randomColor(),
+      feature: plot,
     });
     gtrendlist.setFilterText("");
     stocklist.setFilterText("");
@@ -218,11 +219,12 @@ export default function Sidebar() {
                 onSelectionChange={onSelectionChange}
                 isLoading={stocklist.isLoading}
               >
-                {(item) => (
+                <AutocompleteItem key="AAPL">Apple</AutocompleteItem>
+                {/* {(item) => (
                   <AutocompleteItem key={item.symbol || ""}>
                     {item.query}
                   </AutocompleteItem>
-                )}
+                )} */}
               </Autocomplete>
             </div>
           )}
@@ -254,14 +256,20 @@ export default function Sidebar() {
               <h3>Active Plots</h3>
             </header>
             {data.map((trend, index) => (
-              <div
-                className={styles.trend}
-                style={{ backgroundColor: trend.color }}
-                key={trend.name}
-              >
-                <div className={styles.content}>
-                  <h3>{trend.name}</h3>
-                  <p>{trend.category}</p>
+              <div className={styles.trend} key={trend.name}>
+                <div className={styles.contentContainer}>
+                  <div
+                    style={{
+                      backgroundColor: trend.color,
+                      width: "20px",
+                      height: "20px",
+                      borderRadius: "9999px",
+                    }}
+                  ></div>
+                  <div className={styles.content}>
+                    <h3>{trend.name}</h3>
+                    <p>{trend.category}</p>
+                  </div>
                 </div>
                 <Dropdown backdrop="blur">
                   <DropdownTrigger>
