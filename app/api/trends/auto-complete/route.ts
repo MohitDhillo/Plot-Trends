@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 const googleTrends = require("google-trends-api");
-
+// import googleTrends from "google-trends-api";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const key = searchParams.get("keyword");

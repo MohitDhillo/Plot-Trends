@@ -51,16 +51,23 @@
   padding: 0.5rem 1rem;
   border-radius: 10px;
   color: var(--white);
+  background-color: #212020;
 }
-
+.contentContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
 .content {
   display: flex;
   flex-direction: column;
+  gap: 0.1rem;
   font-weight: var(--semi-bold);
 }
 .content > p {
   font-size: var(--small);
-  color: var(--primary);
+  color: #767676;
+  text-transform:capitalize;
 }
 @media (max-width: 768px) {
   .container > h3 {
