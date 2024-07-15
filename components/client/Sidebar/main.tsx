@@ -219,12 +219,12 @@ export default function Sidebar() {
                 onSelectionChange={onSelectionChange}
                 isLoading={stocklist.isLoading}
               >
-                <AutocompleteItem key="AAPL">Apple</AutocompleteItem>
-                {/* {(item) => (
+                {/* <AutocompleteItem key="AAPL">Apple</AutocompleteItem> */}
+                {(item) => (
                   <AutocompleteItem key={item.symbol || ""}>
                     {item.query}
                   </AutocompleteItem>
-                )} */}
+                )}
               </Autocomplete>
             </div>
           )}
@@ -240,14 +240,14 @@ export default function Sidebar() {
                 onSelectionChange={onSelectionChange}
                 isLoading={cryptolist.isLoading}
               >
-                <AutocompleteItem key="BINANCE:BTCUSDT">
+                {/* <AutocompleteItem key="BINANCE:BTCUSDT">
                   Bitcoin
-                </AutocompleteItem>
-                {/* {(item) => (
+                </AutocompleteItem> */}
+                {(item) => (
                   <AutocompleteItem key={item.symbol || ""}>
                     {item.query}
                   </AutocompleteItem>
-                )} */}
+                )}
               </Autocomplete>
             </div>
           )}

@@ -2,7 +2,6 @@ import camelcaseKeys from "camelcase-keys";
 
 import { type SymbolCryptoExchanges } from "@/lib/jotai/atoms";
 import { createApiBaseWithAbortController } from "./base";
-import {env} from "use-sidecar/dist/es2015/env";
 
 type SymbolData = {
   id: number;
@@ -27,7 +26,10 @@ const getSymbols = async (
   query: string,
   excludeCrypto: boolean
 ): Promise<SymbolData[]> => {
-  const apiBase = await createApiBaseWithAbortController(abortController, process.env.base);
+  const apiBase = await createApiBaseWithAbortController(
+    abortController,
+    process.env.base
+  );
   return await apiBase
     .url(`/symbol/?query=${query}&exclude_crypto=${excludeCrypto}`)
     .get()
