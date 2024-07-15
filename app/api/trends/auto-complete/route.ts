@@ -14,9 +14,13 @@ export async function GET(req: NextRequest) {
 
   try {
     const result = await googleTrends.relatedQueries({ keyword: key });
+
+    if (result.startsWith("<html>")) {
+      throw new Error("Received HTML response instead of JSON");
+    }
+
     const parsedResult = JSON.parse(result);
 
-    // Optionally transform the result
     const autocompleteData =
       parsedResult.default.rankedList[0].rankedKeyword.map((item: any) => ({
         query: item.query,
