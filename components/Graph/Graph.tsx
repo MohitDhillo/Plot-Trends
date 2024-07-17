@@ -36,7 +36,7 @@ const Graph = () => {
     const yScales: Record<string, d3.ScaleLinear<number, number>> = {};
     const featureKeys = Array.from(feature_set.keys());
     const featureSpacing = 60;
-    console.log(data);
+
     featureKeys.forEach((feature, index) => {
       const featureMax = d3.max(
         data
@@ -50,7 +50,7 @@ const Graph = () => {
         .nice()
         .range([height - margin.bottom, margin.top]);
     });
-    console.log(yScales);
+
     svg.selectAll("*").remove();
 
     if (!data.length) {
@@ -64,6 +64,7 @@ const Graph = () => {
         .text("Search for trends to plot the graph");
       return;
     }
+
     const x = d3
       .scaleTime()
       .domain(range)
@@ -72,11 +73,14 @@ const Graph = () => {
         width - featureKeys.length * featureSpacing - margin.right,
       ])
       .nice();
+
     const svgGroup = svg.append("g");
+
     const xGrid = d3
       .axisBottom(x)
       .tickSize(-height + margin.top + margin.bottom)
       .tickFormat(() => "");
+
     const yGrid = d3
       .axisLeft(yScales[featureKeys[0]])
       .tickSize(
@@ -103,15 +107,14 @@ const Graph = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${height - margin.bottom})`)
       .call(d3.axisBottom(x));
-    console.log(width, margin.right, featureSpacing, featureKeys.length);
+
     featureKeys.forEach((feature, index) => {
       svgGroup
         .append("g")
+        .attr("class", `y-axis-${feature}`)
         .attr(
           "transform",
-          `translate(${
-            width - margin.right*2.5 - index * featureSpacing
-          },0)`
+          `translate(${width - margin.right * 2.5 - index * featureSpacing},0)`
         )
         .call(d3.axisRight(yScales[feature]));
     });
@@ -132,7 +135,7 @@ const Graph = () => {
           .attr("stroke", series.color)
           .attr("stroke-width", 1.5)
           .attr("d", line)
-          .attr("class", "graph-line");
+          .attr("class", `graph-line-${series.feature}`);
 
         svgGroup
           .append("g")
@@ -143,6 +146,7 @@ const Graph = () => {
           .attr("cy", (d) => y(d.value))
           .attr("r", 3)
           .attr("fill", series.color)
+          .attr("class", `graph-circle-${series.feature}`)
           .on("mouseover", (event, d) => handleMouseOver(event, d, series.name))
           .on("mousemove", (event, d) => handleMouseMove(event, d))
           .on("mouseout", () => handleMouseOut());
@@ -163,7 +167,7 @@ const Graph = () => {
           .attr("height", (d) => y(0) - y(d.value))
           .attr("width", barWidth)
           .attr("fill", series.color)
-          .attr("class", "graph-bar")
+          .attr("class", `graph-bar-${series.feature}`)
           .on("mouseover", (event, d) => handleMouseOver(event, d, series.name))
           .on("mousemove", (event, d) => handleMouseMove(event, d))
           .on("mouseout", () => handleMouseOut());
@@ -224,10 +228,17 @@ const Graph = () => {
 
       xAxis.call(d3.axisBottom(newX));
 
+      svgGroup.selectAll(".x-grid").call(
+        d3
+          .axisBottom(newX)
+          .tickSize(-height + margin.top + margin.bottom)
+          .tickFormat(() => "")
+      );
+
       featureKeys.forEach((feature) => {
         const newY = yScales[feature];
 
-        svgGroup.selectAll(".graph-line").attr(
+        svgGroup.selectAll(`.graph-line-${feature}`).attr(
           "d",
           d3
             .line<DataPoint>()
@@ -236,16 +247,30 @@ const Graph = () => {
         );
 
         svgGroup
-          .selectAll("circle")
+          .selectAll(`.graph-circle-${feature}`)
           .attr("cx", (d) => newX(d.timestamp!))
           .attr("cy", (d) => newY(d.value));
 
         svgGroup
-          .selectAll(".graph-bar")
+          .selectAll(`.graph-bar-${feature}`)
           .attr("x", (d) => newX(d.timestamp!))
           .attr("y", (d) => newY(d.value))
           .attr("height", (d) => newY(0) - newY(d.value));
+
+        svgGroup.selectAll(`.y-axis-${feature}`).call(d3.axisRight(newY));
       });
+
+      svgGroup.selectAll(".y-grid").call(
+        d3
+          .axisLeft(yScales[featureKeys[0]])
+          .tickSize(
+            -width +
+              margin.left +
+              margin.right +
+              featureKeys.length * featureSpacing
+          )
+          .tickFormat(() => "")
+      );
     }
   }, [data, dimensions, range]);
 
