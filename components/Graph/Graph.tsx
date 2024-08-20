@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import { DataPoint } from "@/lib/definitions";
+import { DataPoint, Series } from "@/lib/definitions";
 import { useGraphStore } from "@/lib/stores/store";
 
 const Graph = () => {
@@ -10,11 +10,10 @@ const Graph = () => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
   const {
-    graphData: data,
+    graphData: seriesData,
     feature_set,
     range,
   } = useGraphStore((state) => state);
-
   useEffect(() => {
     const handleResize = () => {
       const width = svgRef.current?.parentElement?.offsetWidth || 800;
@@ -32,17 +31,21 @@ const Graph = () => {
     const tooltip = d3.select(tooltipRef.current);
     const { width, height } = dimensions;
     const margin = { top: 20, right: 30, bottom: 80, left: 0 };
-
+    console.log(feature_set);
     const yScales: Record<string, d3.ScaleLinear<number, number>> = {};
     const featureKeys = Array.from(feature_set.keys());
     const featureSpacing = 60;
-
+    console.log(featureKeys);
     featureKeys.forEach((feature, index) => {
       const featureMax = d3.max(
-        data
-          .filter((series) => series.feature === feature)
-          .map((series) => d3.max(series.values, (d) => d.value))
+        Array.from(seriesData.values())
+          .filter((series) => series.metrics.has(feature))
+          .flatMap((series) =>
+            series.metrics.get(feature)!.values.map((d) => d.value)
+          )
       );
+      console.log(featureKeys);
+      console.log(featureMax);
 
       yScales[feature] = d3
         .scaleLinear()
@@ -50,10 +53,10 @@ const Graph = () => {
         .nice()
         .range([height - margin.bottom, margin.top]);
     });
-
+    console.log(yScales);
     svg.selectAll("*").remove();
 
-    if (!data.length) {
+    if (!seriesData.length) {
       svg
         .append("text")
         .attr("x", width / 2)
@@ -119,59 +122,64 @@ const Graph = () => {
         .call(d3.axisRight(yScales[feature]));
     });
 
-    data.forEach((series) => {
-      const y = yScales[series.feature];
-
-      if (series.type === "line") {
+    Array.from(seriesData.values()).forEach((series) => {
+      series.metrics.forEach((metric, feature) => {
+        const y = yScales[feature];
         const line = d3
           .line<DataPoint>()
           .x((d) => x(d.timestamp!))
           .y((d) => y(d.value));
 
-        const path = svgGroup
-          .append("path")
-          .datum(series.values)
-          .attr("fill", "none")
-          .attr("stroke", series.color)
-          .attr("stroke-width", 1.5)
-          .attr("d", line)
-          .attr("class", `graph-line-${series.feature}`);
+        if (metric.plot_type === "line") {
+          const path = svgGroup
+            .append("path")
+            .datum(metric.values)
+            .attr("fill", "none")
+            .attr("stroke", metric.color)
+            .attr("stroke-width", 1.5)
+            .attr("d", line)
+            .attr("class", `graph-line-${feature}`);
 
-        svgGroup
-          .append("g")
-          .selectAll("circle")
-          .data(series.values)
-          .join("circle")
-          .attr("cx", (d) => x(d.timestamp!))
-          .attr("cy", (d) => y(d.value))
-          .attr("r", 3)
-          .attr("fill", series.color)
-          .attr("class", `graph-circle-${series.feature}`)
-          .on("mouseover", (event, d) => handleMouseOver(event, d, series.name))
-          .on("mousemove", (event, d) => handleMouseMove(event, d))
-          .on("mouseout", () => handleMouseOut());
+          svgGroup
+            .append("g")
+            .selectAll("circle")
+            .data(metric.values)
+            .join("circle")
+            .attr("cx", (d) => x(d.timestamp!))
+            .attr("cy", (d) => y(d.value))
+            .attr("r", 3)
+            .attr("fill", metric.color)
+            .attr("class", `graph-circle-${feature}`)
+            .on("mouseover", (event, d) =>
+              handleMouseOver(event, d, series.name)
+            )
+            .on("mousemove", (event, d) => handleMouseMove(event, d))
+            .on("mouseout", () => handleMouseOut());
 
-        path.on("mouseover", () => handlePathMouseOver(series.color));
-        path.on("mouseout", () => handlePathMouseOut());
-      } else if (series.type === "bar") {
-        const barWidth =
-          (width - margin.left - margin.right) / series.values.length - 1;
+          path.on("mouseover", () => handlePathMouseOver(metric.color));
+          path.on("mouseout", () => handlePathMouseOut());
+        } else if (metric.plot_type === "bar") {
+          const barWidth =
+            (width - margin.left - margin.right) / metric.values.length - 1;
 
-        svgGroup
-          .append("g")
-          .selectAll("rect")
-          .data(series.values)
-          .join("rect")
-          .attr("x", (d) => x(d.timestamp!))
-          .attr("y", (d) => y(d.value))
-          .attr("height", (d) => y(0) - y(d.value))
-          .attr("width", barWidth)
-          .attr("fill", series.color)
-          .attr("class", `graph-bar-${series.feature}`)
-          .on("mouseover", (event, d) => handleMouseOver(event, d, series.name))
-          .on("mousemove", (event, d) => handleMouseMove(event, d))
-          .on("mouseout", () => handleMouseOut());
-      }
+          svgGroup
+            .append("g")
+            .selectAll("rect")
+            .data(metric.values)
+            .join("rect")
+            .attr("x", (d) => x(d.timestamp!))
+            .attr("y", (d) => y(d.value))
+            .attr("height", (d) => y(0) - y(d.value))
+            .attr("width", barWidth)
+            .attr("fill", metric.color)
+            .attr("class", `graph-bar-${feature}`)
+            .on("mouseover", (event, d) =>
+              handleMouseOver(event, d, series.name)
+            )
+            .on("mousemove", (event, d) => handleMouseMove(event, d))
+            .on("mouseout", () => handleMouseOut());
+        }
+      });
     });
 
     function handleMouseOver(event: any, d: DataPoint, name: string) {
@@ -272,7 +280,7 @@ const Graph = () => {
           .tickFormat(() => "")
       );
     }
-  }, [data, dimensions, range]);
+  }, [seriesData, dimensions, range]);
 
   return (
     <>

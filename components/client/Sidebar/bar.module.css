@@ -45,6 +45,7 @@
   border-radius: 10px;
 }
 .trend {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -54,20 +55,31 @@
   background-color: #212020;
 }
 .contentContainer {
+  width: 100%;
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 .content {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
   font-weight: var(--semi-bold);
 }
-.content > p {
+.metric {
+  width: 100%;
   font-size: var(--small);
   color: #767676;
-  text-transform:capitalize;
+  text-transform: capitalize;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.metric > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 @media (max-width: 768px) {
   .container > h3 {

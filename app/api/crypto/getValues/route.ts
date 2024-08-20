@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const twentyYearsAgo = now - 20 * 365 * 24 * 60 * 60; // 10 years ago
 
     const response = await fetch(
-      `https://finnhub.io/api/v1/crypto/candle?symbol=${symbol}&resolution=M&from=${twentyYearsAgo}&to=${now}&token=${FINNHUB_API_KEY}`
+      `https://finnhub.io/api/v1/crypto/candle?symbol=BINANCE:${symbol}USDT&resolution=M&from=${twentyYearsAgo}&to=${now}&token=${FINNHUB_API_KEY}`
     );
     const result = await response.json();
 

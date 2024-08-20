@@ -6,15 +6,18 @@ export interface DataPoint {
   timestamp: number;
   value: number;
 }
+export interface Metric {
+  plot_type: "line" | "bar";
+  values: DataPoint[];
+  color: string;
+  feature: string;
+}
 
 export interface Series {
   name: string;
   symbol?: string;
-  type: "line" | "bar";
+  metrics: Map<string,Metric>;
   category: "trends" | "stocks" | string;
-  values: DataPoint[];
-  color: string;
-  feature: string;
 }
 
 export interface GraphRef {
