@@ -5,15 +5,20 @@ const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     let symbol = searchParams.get("keyword");
-    let metric = searchParams.get("metric");
+    let metricKey = searchParams.get("metric");
     let freq = searchParams.get("freq");
-    if(!metric)
+    let type = searchParams.get("type");
+    if(!metricKey)
     {
-        metric = "pe" ;
+        metricKey = "ebit" ;
     }
     if(!freq)
     {
         freq = "annual" ;
+    }
+    if(!type)
+    {
+        type = "bs" ;
     }
 
     if (!symbol) {
@@ -25,20 +30,20 @@ export async function GET(req: NextRequest) {
 
     try {
         const response = await fetch(
-            `https://finnhub.io/api/v1/stock/metric?symbol=${symbol}&metric=all&token=${FINNHUB_API_KEY}`
+            `https://finnhub.io/api/v1/stock/financials-reported?symbol=${symbol}&freq=${freq}&token=${FINNHUB_API_KEY}`
         );
         const result = await response.json();
 
-        if (!result.series || !result.series[freq] || !result.series[freq][metric]) {
+        if (!result.data) {
             return NextResponse.json(
                 { error: "Error fetching metric data from Finnhub" },
                 { status: 500 }
             );
         }
 
-        const timelineData = result.series[freq][metric].map((item: { period: string, v: number }) => ({
-            timestamp: Math.floor((new Date(item.period)).getTime()),
-            value: item.v,
+        const timelineData = result.data.map((item: any) => ({
+            timestamp: Math.floor((new Date(item.year, 0 , 1)).getTime()),
+            value: item.report[type][metricKey]
         }));
 
         return NextResponse.json(timelineData);
