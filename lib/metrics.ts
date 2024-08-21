@@ -1,14 +1,14 @@
+import path from "node:path";
+
 export const categories = [
   {
     title: "Profitability Ratios",
     metrics: [
-      { metricKey: "grossMarginAnnual", metricName: "Gross Margin (Annual)" },
-      { metricKey: "grossMarginTTM", metricName: "Gross Margin (TTM)" },
+      { metricKey: "grossMargin", metricName: "Gross Margin (Annual)", path: "/stocks/basic-financials", frequency: "annual" },
+      { metricKey: "grossMargin", metricName: "Gross Margin (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" },
       {
-        metricKey: "operatingMarginAnnual",
-        metricName: "Operating Margin (Annual)",
-      },
-      { metricKey: "operatingMarginTTM", metricName: "Operating Margin (TTM)" },
+        metricKey: "operatingMargin", metricName: "Operating Margin (Annual)", path: "/stocks/basic-financials", frequency: "annual"  },
+      { metricKey: "operatingMargin", metricName: "Operating Margin (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" },
       {
         metricKey: "netProfitMarginAnnual",
         metricName: "Net Profit Margin (Annual)",
@@ -17,27 +17,27 @@ export const categories = [
         metricKey: "netProfitMarginTTM",
         metricName: "Net Profit Margin (TTM)",
       },
-      { metricKey: "pretaxMarginAnnual", metricName: "Pretax Margin (Annual)" },
-      { metricKey: "pretaxMarginTTM", metricName: "Pretax Margin (TTM)" },
-      { metricKey: "roaRfy", metricName: "ROA (Return on Assets) (RFY)" },
-      { metricKey: "roaTTM", metricName: "ROA (Return on Assets) (TTM)" },
-      { metricKey: "roeRfy", metricName: "ROE (Return on Equity) (RFY)" },
-      { metricKey: "roeTTM", metricName: "ROE (Return on Equity) (TTM)" },
+      { metricKey: "pretaxMargin", metricName: "Pretax Margin (Annual)", path: "/stocks/basic-financials", frequency: "annual" },
+      { metricKey: "pretaxMargin", metricName: "Pretax Margin (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" },
+      { metricKey: "roa", metricName: "ROA (Return on Assets) (RFY)", path: "/stocks/basic-financials", frequency: "annual"  },
+      { metricKey: "roaTTM", metricName: "ROA (Return on Assets) (TTM)", path: "/stocks/basic-financials", frequency: "quarterly"  },
+      { metricKey: "roe", metricName: "ROE (Return on Equity) (RFY)", path: "/stocks/basic-financials", frequency: "annual" },
+      { metricKey: "roeTTM", metricName: "ROE (Return on Equity) (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" },
       {
-        metricKey: "roiAnnual",
-        metricName: "ROI (Return on Investment) (Annual)",
+        metricKey: "roic",
+        metricName: "ROI (Return on Invested Capital) (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
-      { metricKey: "roiTTM", metricName: "ROI (Return on Investment) (TTM)" },
+      { metricKey: "roicTTM", metricName: "ROI (Return on Invested Capital) (TTM)", path: "/stocks/basic-financials", frequency: "quarterly"  },
     ],
   },
   {
     title: "Valuation Ratios",
     metrics: [
       {
-        metricKey: "peAnnual",
-        metricName: "P/E (Price to Earnings) Ratio (Annual)",
+        metricKey: "pe",
+        metricName: "P/E (Price to Earnings) Ratio (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
-      { metricKey: "peTTM", metricName: "P/E (Price to Earnings) Ratio (TTM)" },
+      { metricKey: "peTTM", metricName: "P/E (Price to Earnings) Ratio (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" },
       {
         metricKey: "peExclExtraAnnual",
         metricName: "P/E Ratio Excluding Extra Items (Annual)",
@@ -47,18 +47,18 @@ export const categories = [
         metricName: "P/E Ratio Excluding Extra Items (TTM)",
       },
       {
-        metricKey: "pbAnnual",
-        metricName: "P/B (Price to Book) Ratio (Annual)",
+        metricKey: "pb",
+        metricName: "P/B (Price to Book) Ratio (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
       {
-        metricKey: "pbQuarterly",
-        metricName: "P/B (Price to Book) Ratio (Quarterly)",
+        metricKey: "pb",
+        metricName: "P/B (Price to Book) Ratio (Quarterly)", path: "/stocks/basic-financials", frequency: "quarterly"
       },
       {
-        metricKey: "psAnnual",
-        metricName: "P/S (Price to Sales) Ratio (Annual)",
+        metricKey: "ps",
+        metricName: "P/S (Price to Sales) Ratio (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
-      { metricKey: "psTTM", metricName: "P/S (Price to Sales) Ratio (TTM)" },
+      { metricKey: "psTTM", metricName: "P/S (Price to Sales) Ratio (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" },
       { metricKey: "evEbitdaAnnual", metricName: "EV/EBITDA (Annual)" },
       { metricKey: "evEbitdaTTM", metricName: "EV/EBITDA (TTM)" },
       {
@@ -70,27 +70,27 @@ export const categories = [
         metricName: "P/CF (Price to Cash Flow) Ratio (TTM)",
       },
       {
-        metricKey: "pFreeCashFlowAnnual",
-        metricName: "P/FCF (Price to Free Cash Flow) Ratio (Annual)",
+        metricKey: "pfcf",
+        metricName: "P/FCF (Price to Free Cash Flow) Ratio (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
       {
-        metricKey: "pFreeCashFlowTTM",
-        metricName: "P/FCF (Price to Free Cash Flow) Ratio (TTM)",
+        metricKey: "pfcfTTM",
+        metricName: "P/FCF (Price to Free Cash Flow) Ratio (TTM)", path: "/stocks/basic-financials", frequency: "quarterly"
       },
     ],
   },
   {
     title: "Liquidity Ratios",
     metrics: [
-      { metricKey: "currentRatioAnnual", metricName: "Current Ratio (Annual)" },
+      { metricKey: "currentRatio", metricName: "Current Ratio (Annual)", path: "/stocks/basic-financials", frequency: "annual"},
       {
-        metricKey: "currentRatioQuarterly",
-        metricName: "Current Ratio (Quarterly)",
+        metricKey: "currentRatio",
+        metricName: "Current Ratio (Quarterly)", path: "/stocks/basic-financials", frequency: "quarterly"
       },
-      { metricKey: "quickRatioAnnual", metricName: "Quick Ratio (Annual)" },
+      { metricKey: "quickRatio", metricName: "Quick Ratio (Annual)", path: "/stocks/basic-financials", frequency: "annual" },
       {
-        metricKey: "quickRatioQuarterly",
-        metricName: "Quick Ratio (Quarterly)",
+        metricKey: "quickRatio",
+        metricName: "Quick Ratio (Quarterly)", path: "/stocks/basic-financials", frequency: "quarterly"
       },
       {
         metricKey: "cashPerShareAnnual",
@@ -106,25 +106,25 @@ export const categories = [
     title: "Efficiency Ratios",
     metrics: [
       {
-        metricKey: "assetTurnoverAnnual",
-        metricName: "Asset Turnover (Annual)",
+        metricKey: "assetTurnover",
+        metricName: "Asset Turnover (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
-      { metricKey: "assetTurnoverTTM", metricName: "Asset Turnover (TTM)" },
+      { metricKey: "assetTurnoverTTM", metricName: "Asset Turnover (TTM)" , path: "/stocks/basic-financials", frequency: "quarterly"},
       {
-        metricKey: "inventoryTurnoverAnnual",
-        metricName: "Inventory Turnover (Annual)",
+        metricKey: "inventoryTurnover",
+        metricName: "Inventory Turnover (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
       {
         metricKey: "inventoryTurnoverTTM",
-        metricName: "Inventory Turnover (TTM)",
+        metricName: "Inventory Turnover (TTM)", path: "/stocks/basic-financials", frequency: "quarterly"
       },
       {
-        metricKey: "receivablesTurnoverAnnual",
-        metricName: "Receivables Turnover (Annual)",
+        metricKey: "receivablesTurnover",
+        metricName: "Receivables Turnover (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
       {
         metricKey: "receivablesTurnoverTTM",
-        metricName: "Receivables Turnover (TTM)",
+        metricName: "Receivables Turnover (TTM)", path: "/stocks/basic-financials", frequency: "quarterly"
       },
       {
         metricKey: "revenueEmployeeAnnual",
@@ -167,9 +167,9 @@ export const categories = [
     metrics: [
       {
         metricKey: "epsAnnual",
-        metricName: "EPS (Earnings Per Share) (Annual)",
+        metricName: "EPS (Earnings Per Share) (Annual)", path: "/stocks/basic-financials", frequency: "annual"
       },
-      { metricKey: "epsTTM", metricName: "EPS (Earnings Per Share) (TTM)" },
+      { metricKey: "epsTTM", metricName: "EPS (Earnings Per Share) (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" },
       {
         metricKey: "bookValuePerShareAnnual",
         metricName: "Book Value Per Share (Annual)",
@@ -232,7 +232,8 @@ export const categories = [
         metricKey: "dividendYieldIndicatedAnnual",
         metricName: "Dividend Yield (Indicated Annual)",
       },
-      { metricKey: "payoutRatioAnnual", metricName: "Payout Ratio (Annual)" },
+      { metricKey: "payoutRatio", metricName: "Payout Ratio (Annual)", path: "/stocks/basic-financials", frequency: "annual" },
+      { metricKey: "payoutRatioTTM", metricName: "Payout Ratio (TTM)", path: "/stocks/basic-financials", frequency: "quarterly" }
     ],
   },
   {
