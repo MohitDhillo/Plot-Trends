@@ -31,11 +31,9 @@ const Graph = () => {
     const tooltip = d3.select(tooltipRef.current);
     const { width, height } = dimensions;
     const margin = { top: 20, right: 30, bottom: 80, left: 0 };
-    console.log(feature_set);
     const yScales: Record<string, d3.ScaleLinear<number, number>> = {};
     const featureKeys = Array.from(feature_set.keys());
     const featureSpacing = 60;
-    console.log(featureKeys);
     featureKeys.forEach((feature, index) => {
       const featureMax = d3.max(
         Array.from(seriesData.values())
@@ -44,8 +42,6 @@ const Graph = () => {
             series.metrics.get(feature)!.values.map((d) => d.value)
           )
       );
-      console.log(featureKeys);
-      console.log(featureMax);
 
       yScales[feature] = d3
         .scaleLinear()
@@ -53,7 +49,6 @@ const Graph = () => {
         .nice()
         .range([height - margin.bottom, margin.top]);
     });
-    console.log(yScales);
     svg.selectAll("*").remove();
 
     if (!seriesData.length) {
@@ -109,6 +104,8 @@ const Graph = () => {
     const xAxis = svgGroup
       .append("g")
       .attr("transform", `translate(${margin.left},${height - margin.bottom})`)
+      .attr("color", "black")
+      .attr("width", "4")
       .call(d3.axisBottom(x));
 
     featureKeys.forEach((feature, index) => {
@@ -119,6 +116,8 @@ const Graph = () => {
           "transform",
           `translate(${width - margin.right * 2.5 - index * featureSpacing},0)`
         )
+        .attr("color", "black")
+        .attr("width", "4")
         .call(d3.axisRight(yScales[feature]));
     });
 
@@ -250,20 +249,20 @@ const Graph = () => {
           "d",
           d3
             .line<DataPoint>()
-            .x((d) => newX(d.timestamp!))
-            .y((d) => newY(d.value))
+            .x((d: any) => newX(d.timestamp!))
+            .y((d: any) => newY(d.value))
         );
 
         svgGroup
           .selectAll(`.graph-circle-${feature}`)
-          .attr("cx", (d) => newX(d.timestamp!))
-          .attr("cy", (d) => newY(d.value));
+          .attr("cx", (d: any) => newX(d.timestamp!))
+          .attr("cy", (d: any) => newY(d.value));
 
         svgGroup
           .selectAll(`.graph-bar-${feature}`)
-          .attr("x", (d) => newX(d.timestamp!))
-          .attr("y", (d) => newY(d.value))
-          .attr("height", (d) => newY(0) - newY(d.value));
+          .attr("x", (d: any) => newX(d.timestamp!))
+          .attr("y", (d: any) => newY(d.value))
+          .attr("height", (d: any) => newY(0) - newY(d.value));
 
         svgGroup.selectAll(`.y-axis-${feature}`).call(d3.axisRight(newY));
       });
@@ -290,16 +289,29 @@ const Graph = () => {
         style={{
           position: "fixed",
           display: "none",
-          backgroundColor: "white",
+          backgroundColor: "#E0EBF5",
           padding: "5px",
           borderRadius: "3px",
           pointerEvents: "none",
         }}
       ></div>
-      <style jsx>{`
+      {/* <style jsx>{`
         .x-grid .tick line,
         .y-grid .tick line {
           stroke: lightgrey;
+        }
+      `}</style> */}
+      {/* <style jsx>{`
+        .x-grid .tick line,
+        .y-grid .tick line {
+          stroke: lightgrey;
+          opacity: 0.1;
+        }
+      `}</style> */}
+      <style jsx>{`
+        .x-grid .tick line,
+        .y-grid .tick line {
+          stroke: #f0f0f0 !important; /* Force apply the light grey color */
         }
       `}</style>
     </>

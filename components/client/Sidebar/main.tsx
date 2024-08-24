@@ -130,8 +130,8 @@ export default function Sidebar() {
     const params = { keyword: Key };
     const result = await getData(plot, params);
     if (!result || result.error) {
-      toast.error(result.error);
-      result;
+      toast.error("Unable to fetch data");
+      return;
     }
     // add error functions
     let metricmap = new Map();
@@ -169,11 +169,18 @@ export default function Sidebar() {
   };
   const handleDropdown = (key: any, index: number, param: string) => {
     if (key == "delete") {
-      removeGraph(index, param);
     } else if (key == "color") {
       console.log("color");
       updateGraph(index, param, color ? color : randomColor());
     }
+  };
+  const handleDelete = (index: number, param: string) => {
+    console.log(index, param);
+    if (index == undefined || param == undefined || !param) {
+      toast.error("Some error Occured");
+      return;
+    }
+    removeGraph(index, param);
   };
   return (
     <main className={styles.container}>
@@ -285,7 +292,9 @@ export default function Sidebar() {
               {MetricData.map((section) => (
                 <AutocompleteSection title={section.title} key={section.title}>
                   {section.metrics.map((item) => (
-                    <AutocompleteItem key={item.metricKey}>
+                    <AutocompleteItem
+                      key={`${item.path}|${item.metricKey}|${item.frequency}`}
+                    >
                       {item.metricName}
                     </AutocompleteItem>
                   ))}
@@ -303,7 +312,7 @@ export default function Sidebar() {
                   <div className={styles.content}>
                     <h3>{trend.name}</h3>
                     {Array.from(trend.metrics).map((metric) => (
-                      <div className={styles.metric}>
+                      <div className={styles.metric} key={metric[0]}>
                         <p>{metric[0]}</p>
                         <div>
                           <div
@@ -357,15 +366,77 @@ export default function Sidebar() {
                                   />
                                 </div>
                               </DropdownItem>
-                              <DropdownItem
+                              {/* <DropdownItem
                                 key="delete"
                                 className="text-danger"
                                 color="danger"
                               >
                                 Delete
-                              </DropdownItem>
+                              </DropdownItem> */}
                             </DropdownMenu>
                           </Dropdown>
+                          <button
+                            onClick={(e) => handleDelete(index, metric[0])}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              xmlnsXlink="http://www.w3.org/1999/xlink"
+                              version="1.1"
+                              width="15"
+                              height="15"
+                              viewBox="0 0 256 256"
+                              xmlSpace="preserve"
+                            >
+                              <defs></defs>
+                              <g
+                                style={{
+                                  stroke: "none",
+                                  strokeWidth: 0,
+                                  strokeDasharray: "none",
+                                  strokeLinecap: "butt",
+                                  strokeLinejoin: "miter",
+                                  strokeMiterlimit: 10,
+                                  fill: "none",
+                                  fillRule: "nonzero",
+                                  opacity: 1,
+                                }}
+                                transform="translate(1.407 1.407) scale(2.81 2.81)"
+                              >
+                                <path
+                                  d="M 10 90 c -2.559 0 -5.119 -0.977 -7.071 -2.929 c -3.905 -3.905 -3.905 -10.237 0 -14.143 l 70 -70 c 3.906 -3.905 10.236 -3.905 14.143 0 c 3.905 3.905 3.905 10.237 0 14.143 l -70 70 C 15.119 89.023 12.559 90 10 90 z"
+                                  style={{
+                                    stroke: "none",
+                                    strokeWidth: 1,
+                                    strokeDasharray: "none",
+                                    strokeLinecap: "butt",
+                                    strokeLinejoin: "miter",
+                                    strokeMiterlimit: 10,
+                                    fill: "rgb(236,0,0)",
+                                    fillRule: "nonzero",
+                                    opacity: 1,
+                                  }}
+                                  transform="matrix(1 0 0 1 0 0)"
+                                  strokeLinecap="round"
+                                />
+                                <path
+                                  d="M 80 90 c -2.56 0 -5.118 -0.977 -7.071 -2.929 l -70 -70 c -3.905 -3.905 -3.905 -10.237 0 -14.143 c 3.905 -3.905 10.237 -3.905 14.143 0 l 70 70 c 3.905 3.905 3.905 10.237 0 14.143 C 85.118 89.023 82.56 90 80 90 z"
+                                  style={{
+                                    stroke: "none",
+                                    strokeWidth: 1,
+                                    strokeDasharray: "none",
+                                    strokeLinecap: "butt",
+                                    strokeLinejoin: "miter",
+                                    strokeMiterlimit: 10,
+                                    fill: "rgb(236,0,0)",
+                                    fillRule: "nonzero",
+                                    opacity: 1,
+                                  }}
+                                  transform="matrix(1 0 0 1 0 0)"
+                                  strokeLinecap="round"
+                                />
+                              </g>
+                            </svg>
+                          </button>
                         </div>
                       </div>
                     ))}

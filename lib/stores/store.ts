@@ -87,7 +87,7 @@ type GraphStore = {
   range: [Date, Date];
   feature_set: Map<string, number>;
   appendGraph: (data: Series) => void;
-  appendMetric: (type: string, name: string) => Promise<void>;
+  appendMetric: (type: string, key: string) => Promise<void>;
   updateGraph: (index: number, param: string, data: string) => void;
   removeGraph: (index: number, param: string) => void;
   changeRange: (newRange: [Date, Date]) => void;
@@ -112,14 +112,15 @@ export const useGraphStore = create<GraphStore>((set) => ({
       };
     }),
 
-  appendMetric: async (type, name) => {
+  appendMetric: async (type, key) => {
+    const [path, name, freq] = key.split("|");
     const state = useGraphStore.getState();
     const newFeatureSet = new Map(state.feature_set);
     newFeatureSet.set(name, (newFeatureSet.get(name) || 0) + 1);
     const updatedGraphData = await Promise.all(
       state.graphData.map(async (series) => {
         if (series.category === type) {
-          const apiUrl = `/api/EBITDA?keyword=${series.name}`;
+          const apiUrl = `/api/${path}?keyword=${series.name}&metric=${name}&freq=${freq}`;
           const response = await fetch(apiUrl);
           const newMetric = await response.json();
           const updatedSeries = {
