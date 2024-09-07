@@ -120,7 +120,7 @@ const Graph = () => {
         .attr("width", "4")
         .call(d3.axisRight(yScales[feature]));
     });
-
+    console.log(yScales);
     Array.from(seriesData.values()).forEach((series) => {
       series.metrics.forEach((metric, feature) => {
         const y = yScales[feature];

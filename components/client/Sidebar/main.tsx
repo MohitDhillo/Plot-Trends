@@ -293,7 +293,7 @@ export default function Sidebar() {
                 <AutocompleteSection title={section.title} key={section.title}>
                   {section.metrics.map((item) => (
                     <AutocompleteItem
-                      key={`${item.path}|${item.metricKey}|${item.frequency}`}
+                      key={`${item.path}|${item.metricKey}|${item.frequency}|${item.metricName}`}
                     >
                       {item.metricName}
                     </AutocompleteItem>

@@ -113,14 +113,14 @@ export const useGraphStore = create<GraphStore>((set) => ({
     }),
 
   appendMetric: async (type, key) => {
-    const [path, name, freq] = key.split("|");
+    const [path, metrickey, freq, name] = key.split("|");
     const state = useGraphStore.getState();
     const newFeatureSet = new Map(state.feature_set);
-    newFeatureSet.set(name, (newFeatureSet.get(name) || 0) + 1);
+    newFeatureSet.set(name, (newFeatureSet.get(metrickey) || 0) + 1);
     const updatedGraphData = await Promise.all(
       state.graphData.map(async (series) => {
         if (series.category === type) {
-          const apiUrl = `/api/${path}?keyword=${series.name}&metric=${name}&freq=${freq}`;
+          const apiUrl = `/api/${path}?keyword=${series.name}&metric=${metrickey}&freq=${freq}`;
           const response = await fetch(apiUrl);
           const newMetric = await response.json();
           const updatedSeries = {
@@ -132,6 +132,7 @@ export const useGraphStore = create<GraphStore>((set) => ({
               feature: name,
             }),
           };
+          console.log(updatedSeries);
           return updatedSeries;
         }
         return series;
